@@ -45,7 +45,7 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 
 ### Hooks
 
-Supported on both Claude Code and Codex via `.codex/hooks.json`.
+Claude Code hooks are built-in. Codex hooks require copying `templates/.codex` to your project root (see [Codex installation](#codex)).
 
 | Event | Behavior |
 |-------|----------|
