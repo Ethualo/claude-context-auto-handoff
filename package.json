@@ -11,7 +11,9 @@
     "build",
     ".claude-plugin",
     "hooks",
+    "templates",
     "README.md",
+    "LICENSE",
     "setup.sh",
     "setup.ps1"
   ],
