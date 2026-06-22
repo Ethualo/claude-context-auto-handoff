@@ -1,0 +1,29 @@
+{
+  "name": "claude-context-auto-handoff",
+  "version": "1.0.0",
+  "description": "A Claude Code plugin to automate session handoffs before context compaction.",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "claude-context-handoff": "build/index.js"
+  },
+  "files": [
+  "build",
+    ".claude-plugin",
+    "hooks",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
