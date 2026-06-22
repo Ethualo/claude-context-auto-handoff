@@ -8,10 +8,12 @@
     "claude-context-handoff": "build/index.js"
   },
   "files": [
-  "build",
+    "build",
     ".claude-plugin",
     "hooks",
-    "README.md"
+    "README.md",
+    "setup.sh",
+    "setup.ps1"
   ],
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
