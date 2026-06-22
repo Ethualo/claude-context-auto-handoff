@@ -1,0 +1,18 @@
+{
+  "name": "claude-context-handoff",
+  "version": "1.0.0",
+  "description": "Automatically saves session context and generates handoff manifests before Claude compacts or stops.",
+  "author": {
+    "name": "Ethualo",
+    "email": "lkh0926ym@naver.com"
+  },
+  "engines": {
+    "claude": "^1.0.0"
+  },
+  "mcpServers": {
+    "context-handoff-manager": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/build/index.js"]
+    }
+  }
+}
