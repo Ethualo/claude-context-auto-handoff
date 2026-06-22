@@ -8,16 +8,17 @@ const server = new McpServer({
     name: 'context-handoff-manager',
     version: '1.0.0'
 });
-const CONTEXT_THRESHOLD = parseInt(process.env.CONTEXT_THRESHOLD ?? '70', 10);
 server.tool('generate_handoff_manifest', {
-    summary: z.string().describe('Full recap of work done this session'),
+    summary: z.string().optional().describe('Detailed session recap — omit if other fields cover it'),
     nextSteps: z.array(z.string()).describe('Tasks to continue immediately in the next session'),
-    taskDescription: z.string().optional().describe('The final goal of this work'),
-    currentStatus: z.string().optional().describe('What is done vs what remains'),
-    keyDecisions: z.array(z.string()).optional().describe('Architecture choices and why — prevents post-compaction amnesia'),
-    failedApproaches: z.array(z.string()).optional().describe('Already-failed attempts — prevents repeating mistakes next session'),
-    blockers: z.string().optional().describe('Unresolved errors or blockers')
-}, async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers }) => {
+    taskDescription: z.string().optional().describe('High-level goal + core intent (why this matters). Use telegraphese — drop articles/pronouns.'),
+    currentStatus: z.string().optional().describe('What is done vs what remains. State why, not just what.'),
+    keyDecisions: z.array(z.string()).optional().describe('Architecture choices and why — prevents post-compaction amnesia. Format: "Decision: X — Reason: Y"'),
+    failedApproaches: z.array(z.string()).optional().describe('Already-failed attempts. Format each: "Approach: X → Result: Y → Lesson: Z". Prevents repeating mistakes.'),
+    blockers: z.string().optional().describe('Unresolved errors or blockers'),
+    modifiedFiles: z.array(z.string()).optional().describe('Changed files with delta notes. Format: "path/to/file: what changed" — NO code snippets, path+delta only.'),
+    implicitRules: z.array(z.string()).optional().describe('Tech stack, naming conventions, env vars, implicit project rules — anything not derivable from reading code')
+}, async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules }) => {
     try {
         const claudeDir = path.join(process.cwd(), '.claude');
         const handoffsDir = path.join(claudeDir, 'handoffs');
@@ -28,7 +29,7 @@ server.tool('generate_handoff_manifest', {
         const now = new Date();
         const displayTime = now.toLocaleString();
         const timestamp = now.toISOString().replace(/[:.]/g, '-');
-        const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, displayTime });
+        const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime });
         const mainPath = path.join(claudeDir, 'handoff.md');
         fs.writeFileSync(mainPath, content, 'utf-8');
         const archivePath = path.join(handoffsDir, `handoff-${timestamp}.md`);
@@ -36,7 +37,7 @@ server.tool('generate_handoff_manifest', {
         return {
             content: [{
                     type: 'text',
-                    text: `Handoff saved.\nLatest: ${mainPath}\nArchive: ${archivePath}\n[Handoff Guard] threshold: ${CONTEXT_THRESHOLD}% | run /resume in next session`
+                    text: `Handoff saved.\nLatest: ${mainPath}\nArchive: ${archivePath}`
                 }]
         };
     }
@@ -48,30 +49,47 @@ server.tool('generate_handoff_manifest', {
     }
 });
 function buildMarkdown(params) {
-    const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, displayTime } = params;
+    const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime } = params;
     const sections = [
-        `# AI Session Handoff Manifest`,
+        `# Session Handoff Snapshot`,
         `> **Generated:** ${displayTime}`,
         ``
     ];
     if (taskDescription) {
-        sections.push(`## Task Description\n${taskDescription}\n`);
+        sections.push(`## 🎯 High-Level Objective\n* **Goal:** ${taskDescription}\n`);
     }
-    sections.push(`## Summary\n${summary}\n`);
-    if (currentStatus) {
-        sections.push(`## Current Status\n${currentStatus}\n`);
+    const stateLines = [];
+    if (currentStatus)
+        stateLines.push(`* **Status:** ${currentStatus}`);
+    if (blockers)
+        stateLines.push(`* **Blocker:** ${blockers}`);
+    if (nextSteps.length > 0)
+        stateLines.push(`* **Next Action:** ${nextSteps[0]}`);
+    if (stateLines.length > 0) {
+        sections.push(`## 📌 Current State & Next Steps\n${stateLines.join('\n')}\n`);
+        if (nextSteps.length > 1) {
+            sections.push(`### Remaining Queue\n${nextSteps.slice(1).map(s => `- [ ] ${s}`).join('\n')}\n`);
+        }
+    }
+    else {
+        sections.push(`## 📌 Next Steps\n${nextSteps.map(s => `- [ ] ${s}`).join('\n')}\n`);
+    }
+    if (modifiedFiles && modifiedFiles.length > 0) {
+        sections.push(`## 🛠️ Modified Files Delta\n${modifiedFiles.map(f => `* ${f}`).join('\n')}\n`);
+    }
+    if (failedApproaches && failedApproaches.length > 0) {
+        sections.push(`## 🚫 Failed Approaches (DO NOT RETRY)\n${failedApproaches.map(f => `* ${f}`).join('\n')}\n`);
+    }
+    if (implicitRules && implicitRules.length > 0) {
+        sections.push(`## 🔑 Crucial Context & Implicit Rules\n${implicitRules.map(r => `* ${r}`).join('\n')}\n`);
     }
     if (keyDecisions && keyDecisions.length > 0) {
         sections.push(`## Key Decisions\n${keyDecisions.map(d => `- ${d}`).join('\n')}\n`);
     }
-    if (failedApproaches && failedApproaches.length > 0) {
-        sections.push(`## Failed Approaches (DO NOT RETRY)\n${failedApproaches.map(f => `- ${f}`).join('\n')}\n`);
+    if (summary) {
+        sections.push(`## Summary\n${summary}\n`);
     }
-    if (blockers) {
-        sections.push(`## Active Blockers\n${blockers}\n`);
-    }
-    sections.push(`## Next Steps\n${nextSteps.map(s => `- [ ] ${s}`).join('\n')}\n`);
-    sections.push(`---\n*Run \`/resume\` in the next session to restore this context.*`);
+    sections.push(`---\n*Context is auto-restored on session start. Manual restore: \`/resume\`*`);
     return sections.join('\n');
 }
 async function main() {
