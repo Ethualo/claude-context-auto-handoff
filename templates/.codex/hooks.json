@@ -1,0 +1,43 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs'),path=require('path');const f=path.join(process.cwd(),'.claude','handoff.md');if(fs.existsSync(f)){console.log('CONTEXT HANDOFF FOUND — restore this context before doing anything else:');console.log('---');console.log(fs.readFileSync(f,'utf8'));console.log('---');console.log('Begin from first uncompleted Next Step. Never retry Failed Approaches.')}\"",
+            "timeout": 5,
+            "statusMessage": "Restoring session context"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log('CRITICAL: Context is about to be compressed. You MUST call generate_handoff_manifest NOW with a complete session summary before this happens. Include: summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, modifiedFiles, implicitRules. Do not skip this step.')\"",
+            "timeout": 5,
+            "statusMessage": "Saving handoff before compaction"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs'),path=require('path');const f=path.join(process.cwd(),'.claude','handoff.md');if(!fs.existsSync(f)){console.log('No handoff file found. If this session had meaningful work, call generate_handoff_manifest before ending.')}else{const age=(Date.now()-fs.statSync(f).mtimeMs)/1000;if(age>300){console.log('HANDOFF STALE (last saved '+Math.round(age/60)+' min ago). Call generate_handoff_manifest to update session context.')}}\"",
+            "timeout": 5,
+            "statusMessage": "Checking handoff status"
+          }
+        ]
+      }
+    ]
+  }
+}
