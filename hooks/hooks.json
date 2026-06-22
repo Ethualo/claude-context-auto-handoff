@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "CRITICAL: 현재 대화의 컨텍스트가 가득 차서 압축(Compact) 가동이 감지되었습니다. 압축으로 인해 유실될 수 있는 현재까지의 개발 마일스톤, 주요 설계 결정 사항, 그리고 남은 할 일 목록을 정리하여 반드시 'generate_handoff_manifest' 도구를 호출해 로컬에 기록하십시오."
+            "prompt": "CRITICAL: Context compaction imminent. Call 'generate_handoff_manifest' NOW before compaction. Fill all fields: summary (full session recap), taskDescription (goal), currentStatus (done vs remaining), keyDecisions (architecture choices + why), failedApproaches (already-failed — do NOT retry), nextSteps (next session tasks), blockers (unresolved errors). Do NOT allow compaction without calling this tool."
           }
         ]
       }
@@ -15,7 +15,17 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "사용자가 기능을 성공적으로 구현했거나 '테스트 완료', '커밋 완료' 등 작업 단위를 마무리한 것으로 판단되면, 다음 세션을 매끄럽게 이어나갈 수 있도록 주도적으로 'generate_handoff_manifest' 도구를 호출하여 인계 문서를 작성하세요."
+            "prompt": "If a work unit just completed (feature done, tests passed, commit made), call 'generate_handoff_manifest'. Fill taskDescription, keyDecisions, and failedApproaches so the next session has full context."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "On session start: if .claude/handoff.md exists, read it and briefly brief the user (in their language) on Task Description, Current Status, Key Decisions, Failed Approaches, Blockers, Next Steps. If absent, stay silent."
           }
         ]
       }
