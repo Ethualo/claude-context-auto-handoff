@@ -129,29 +129,27 @@ This enables the same `SessionStart`, `PreCompact`, and `Stop` hooks as Claude C
 
 ### Claude Code
 
-Runs automatically on `PreCompact` and `Stop`. Generated manifests are saved to `.claude/handoff.md`.
+All three hooks fire automatically — `SessionStart` restores context on session open, `PreCompact` saves before compression, `Stop` warns if handoff is stale. Generated manifests are saved to `.claude/handoff.md`.
 
 **Manual checkpoint:**
 ```
 /handoff
 ```
 
-**Resume in a new session:**
+**Manual resume (if auto-restore didn't trigger):**
 ```
 /resume
 ```
 
 ### Codex
 
-Hooks fire automatically via `.codex/hooks.json` — same events as Claude Code:
+Same three hooks fire automatically via `.codex/hooks.json`. No slash commands — hooks handle everything.
 
 | Event | Behavior |
 |-------|----------|
 | `SessionStart` | Reads `.claude/handoff.md` and injects content as context |
 | `PreCompact` | Prompts Codex to call `generate_handoff_manifest` before compression |
 | `Stop` | Warns if handoff is stale (>5 min) or missing |
-
-No slash commands — hooks handle everything automatically.
 
 ### Output format
 
