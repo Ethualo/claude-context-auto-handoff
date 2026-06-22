@@ -1,5 +1,5 @@
 # context-handoff-mcp-server — one-line setup for Windows (PowerShell)
-# Usage: irm https://raw.githubusercontent.com/YOUR_USERNAME/context-handoff-mcp-server/main/setup.ps1 | iex
+# Usage: irm https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 

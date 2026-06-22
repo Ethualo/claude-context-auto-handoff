@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # context-handoff-mcp-server — one-line setup for Linux/macOS
-# Usage: curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/context-handoff-mcp-server/main/setup.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.sh | bash
 
 set -e
 
