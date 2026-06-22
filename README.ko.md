@@ -1,6 +1,6 @@
 # claude-context-auto-handoff
 
-한국어 | **[English](README.md)**
+**[English](README.md)** | 한국어
 
 컨텍스트 압축 또는 세션 종료 직전, 다음 세션이 현재 맥락을 그대로 이어받을 수 있도록 핸드오프 문서를 자동으로 작성하는 Claude Code 플러그인.
 

@@ -1,6 +1,6 @@
 # claude-context-auto-handoff
 
-**[한국어](README.ko.md)** | English
+English | **[한국어](README.ko.md)**
 
 Claude Code plugin that automatically saves session context and generates handoff manifests before Claude compacts or stops.
 
