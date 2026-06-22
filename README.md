@@ -55,6 +55,26 @@ Claude Code hooks are built-in. Codex hooks require copying `templates/.codex` t
 
 ---
 
+## Quick Start
+
+**Linux / macOS**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.sh | bash
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.ps1 | iex
+```
+
+**npm (cross-platform)**
+```bash
+npm install -g claude-context-auto-handoff
+claude-context-handoff-setup
+```
+
+---
+
 ## Installation
 
 ### As a Claude Code plugin
@@ -67,6 +87,7 @@ claude plugin install claude-context-auto-handoff
 
 ```bash
 npm install -g claude-context-auto-handoff
+npm run setup  # hooks.json 자동 배치
 ```
 
 ### Manual MCP configuration (Claude Code)
@@ -165,11 +186,6 @@ No slash commands — hooks handle everything automatically.
 ```
 
 ---
-
-## Requirements
-
-- Claude Code ≥ 1.0.0 **or** Codex (desktop app)
-- Node.js ≥ 18
 
 ## License
 
