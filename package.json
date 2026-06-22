@@ -5,21 +5,24 @@
   "type": "module",
   "main": "build/index.js",
   "bin": {
-    "claude-context-handoff": "build/index.js"
+    "claude-context-handoff": "build/index.js",
+    "claude-context-handoff-setup": "scripts/setup.js"
   },
   "files": [
     "build",
     ".claude-plugin",
     "hooks",
     "templates",
+    "scripts",
     "README.md",
-    "LICENSE",
-    "setup.sh",
-    "setup.ps1"
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "setup": "node scripts/setup.js",
+    "setup:unix": "bash scripts/setup.sh",
+    "setup:win": "powershell -ExecutionPolicy Bypass -File scripts/setup.ps1"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
