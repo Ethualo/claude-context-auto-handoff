@@ -10,7 +10,6 @@ const server = new McpServer({
   version: '1.0.0'
 });
 
-const CONTEXT_THRESHOLD = parseInt(process.env.CONTEXT_THRESHOLD ?? '70', 10);
 
 server.tool(
   'generate_handoff_manifest',
@@ -48,7 +47,7 @@ server.tool(
       return {
         content: [{
           type: 'text',
-          text: `Handoff saved.\nLatest: ${mainPath}\nArchive: ${archivePath}\n[Handoff Guard] threshold: ${CONTEXT_THRESHOLD}% | run /resume in next session`
+          text: `Handoff saved.\nLatest: ${mainPath}\nArchive: ${archivePath}`
         }]
       };
     } catch (error: any) {
@@ -117,7 +116,7 @@ function buildMarkdown(params: {
     sections.push(`## Summary\n${summary}\n`);
   }
 
-  sections.push(`---\n*Run \`/resume\` in the next session to restore this context.*`);
+  sections.push(`---\n*Context is auto-restored on session start. Manual restore: \`/resume\`*`);
 
   return sections.join('\n');
 }
