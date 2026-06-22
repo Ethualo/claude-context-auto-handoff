@@ -2,7 +2,7 @@
 
 English | **[한국어](README.ko.md)**
 
-Claude Code plugin that automatically saves session context and generates handoff manifests before Claude compacts or stops.
+Claude Code plugin that automatically saves session context and generates token-efficient handoff manifests before Claude compacts or stops.
 
 ![npm version](https://img.shields.io/npm/v/claude-context-auto-handoff)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
@@ -14,26 +14,44 @@ Claude Code plugin that automatically saves session context and generates handof
 
 Claude's context window eventually fills and compacts — losing design decisions, active blockers, and next steps mid-session. This plugin hooks into `PreCompact` and `Stop` events to trigger an AI-authored handoff document before that happens, so the next session picks up exactly where this one left off.
 
+Handoff content is written in **telegraphese** (no articles, no filler, no code snippets) and structured to maximize token efficiency while preserving all decision context the next session needs.
+
 ---
 
 ## Components
 
 ### Tools
 
-- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory.
+- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/handoff-{timestamp}.md`.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `summary` | `string` | ✅ | Key decisions, milestones, and current architecture state |
+| `summary` | `string` | ✅ | Terse session recap (telegraphese) |
 | `nextSteps` | `string[]` | ✅ | Ordered todo list for the next session |
-| `blockers` | `string` | ❌ | Unresolved errors or open questions |
+| `taskDescription` | `string` | ✗ | High-level goal + core intent (why this matters) |
+| `currentStatus` | `string` | ✗ | What is done vs what remains — state why, not just what |
+| `keyDecisions` | `string[]` | ✗ | Architecture choices and reasons. Format: `"Decision: X — Reason: Y"` |
+| `failedApproaches` | `string[]` | ✗ | Already-failed attempts. Format: `"Approach: X → Result: Y → Lesson: Z"` |
+| `modifiedFiles` | `string[]` | ✗ | Changed files with delta notes. Format: `"path/to/file: what changed"` — no code |
+| `implicitRules` | `string[]` | ✗ | Tech stack, naming conventions, env vars — anything not derivable from reading code |
+| `blockers` | `string` | ✗ | Unresolved errors or open questions |
+
+### Skills
+
+| Command | Behavior |
+|---------|----------|
+| `/handoff` | Gather session context and call `generate_handoff_manifest` |
+| `/resume` | Read `.claude/handoff.md` and restore context in a new session |
 
 ### Hooks
 
+Supported on both Claude Code and Codex via `.codex/hooks.json`.
+
 | Event | Behavior |
 |-------|----------|
-| `PreCompact` | Prompts Claude to call `generate_handoff_manifest` before context compression |
-| `Stop` | Prompts Claude to call `generate_handoff_manifest` when a task unit completes |
+| `PreCompact` | Prompts the model to call `generate_handoff_manifest` before context compression |
+| `Stop` | Warns if handoff is stale or missing after each response |
+| `SessionStart` | Auto-restores context from `.claude/handoff.md` if it exists |
 
 ---
 
@@ -51,7 +69,7 @@ claude plugin install claude-context-auto-handoff
 npm install -g claude-context-auto-handoff
 ```
 
-### Manual MCP configuration
+### Manual MCP configuration (Claude Code)
 
 Add to your Claude Code `settings.json`:
 
@@ -66,45 +84,91 @@ Add to your Claude Code `settings.json`:
 }
 ```
 
+### Codex
+
+Add to `~/.codex/config.toml` (global MCP config):
+
+```toml
+[mcp_servers.context-handoff]
+command = "node"
+args = ["/path/to/build/index.js"]
+```
+
+Then copy the hook templates to your project root:
+
+```bash
+cp -r /path/to/claude-context-auto-handoff/templates/.codex ./.codex
+```
+
+This enables the same `SessionStart`, `PreCompact`, and `Stop` hooks as Claude Code.
+
 ---
 
 ## Usage
 
-Once installed, the plugin runs automatically. Generated manifests are saved to `.claude/handoff.md` in your project root.
+### Claude Code
 
-To resume in a new session:
+Runs automatically on `PreCompact` and `Stop`. Generated manifests are saved to `.claude/handoff.md`.
 
+**Manual checkpoint:**
 ```
-.claude/handoff.md 읽고 이어서 진행해줘.
+/handoff
 ```
 
-To checkpoint manually at any time:
+**Resume in a new session:**
+```
+/resume
+```
 
-```
-지금까지 내용을 핸드오프 문서로 저장해줘.
-```
+### Codex
+
+Hooks fire automatically via `.codex/hooks.json` — same events as Claude Code:
+
+| Event | Behavior |
+|-------|----------|
+| `SessionStart` | Reads `.claude/handoff.md` and injects content as context |
+| `PreCompact` | Prompts Codex to call `generate_handoff_manifest` before compression |
+| `Stop` | Warns if handoff is stale (>5 min) or missing |
+
+No slash commands — hooks handle everything automatically.
 
 ### Output format
 
 ```markdown
-# 🔄 AI Session Handoff Manifest
-> Generated on: 2026-06-22 15:30
+# Session Handoff Snapshot
+> **Generated:** 6/22/2026, 3:30:00 PM
 
-## 📝 세션 요약 및 현재 문맥
-...
+## 🎯 High-Level Objective
+* **Goal:** Build Next.js 15 app syncing Supabase + Notion stock data in real-time
+* **Core Intent:** Minimize client re-fetches via Zustand store — cost control
 
-## ⚠️ 해결 중이던 블로커
-...
+## 📌 Current State & Next Steps
+* **Status:** Task 3 (Zustand store) complete
+* **Blocker:** Notion API rate limit (3 req/s) — buffer layer needed
+* **Next Action:** Implement Supabase Edge Functions debounce queue
 
-## 🚀 다음 세션 Task List
-- [ ] ...
+## 🛠️ Modified Files Delta
+* src/store/stockStore.ts: Zustand store skeleton + syncStatus state
+* src/app/api/notion/sync/route.ts: POST handler written, Supabase not wired yet
+
+## 🚫 Failed Approaches (DO NOT RETRY)
+* Approach: Call Notion API directly from Server Actions → Result: Rate limit hit on re-render → Lesson: Queue middleware mandatory
+* Approach: useEffect polling → Result: Supabase read usage spike → Lesson: Abandoned
+
+## 🔑 Crucial Context & Implicit Rules
+* Stack: Next.js 15 (App Router), Supabase v2, Zustand v5
+* Naming: API endpoints always route.ts, PascalCase store names
+* Env: NEXT_PUBLIC_SUPABASE_ANON_KEY active
+
+---
+*Run `/resume` in the next session to restore this context.*
 ```
 
 ---
 
 ## Requirements
 
-- Claude Code ≥ 1.0.0
+- Claude Code ≥ 1.0.0 **or** Codex (desktop app)
 - Node.js ≥ 18
 
 ## License
