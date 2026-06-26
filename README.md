@@ -9,6 +9,13 @@ Claude Code plugin that automatically saves session context and generates token-
 
 ---
 
+## Requirements
+
+- **Node.js 18+** — must be on `PATH` as `node`
+- **Claude Code** or **Codex** — plugin and hooks require Claude Code CLI or Codex CLI
+
+---
+
 ## Overview
 
 Claude's context window eventually fills and compacts — losing design decisions, active blockers, and next steps mid-session. This plugin hooks into `PreCompact` and `Stop` events to trigger an AI-authored handoff document before that happens, so the next session picks up exactly where this one left off.
