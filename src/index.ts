@@ -14,15 +14,15 @@ const server = new McpServer({
 server.tool(
   'generate_handoff_manifest',
   {
-    summary: z.string().optional().describe('Detailed session recap — omit if other fields cover it'),
-    nextSteps: z.array(z.string()).describe('Tasks to continue immediately in the next session'),
-    taskDescription: z.string().optional().describe('High-level goal + core intent (why this matters). Use telegraphese — drop articles/pronouns.'),
-    currentStatus: z.string().optional().describe('What is done vs what remains. State why, not just what.'),
-    keyDecisions: z.array(z.string()).optional().describe('Architecture choices and why — prevents post-compaction amnesia. Format: "Decision: X — Reason: Y"'),
-    failedApproaches: z.array(z.string()).optional().describe('Already-failed attempts. Format each: "Approach: X → Result: Y → Lesson: Z". Prevents repeating mistakes.'),
-    blockers: z.string().optional().describe('Unresolved errors or blockers'),
+    summary: z.string().optional().describe('Detailed session recap in English — omit if other fields cover it'),
+    nextSteps: z.array(z.string()).describe('Tasks to continue immediately in the next session. Write in English.'),
+    taskDescription: z.string().optional().describe('High-level goal + core intent (why this matters). Use telegraphese — drop articles/pronouns. Write in English.'),
+    currentStatus: z.string().optional().describe('What is done vs what remains. State why, not just what. Write in English.'),
+    keyDecisions: z.array(z.string()).optional().describe('Architecture choices and why — prevents post-compaction amnesia. Format: "Decision: X — Reason: Y". Write in English.'),
+    failedApproaches: z.array(z.string()).optional().describe('Already-failed attempts. Format each: "Approach: X → Result: Y → Lesson: Z". Prevents repeating mistakes. Write in English.'),
+    blockers: z.string().optional().describe('Unresolved errors or blockers. Write in English.'),
     modifiedFiles: z.array(z.string()).optional().describe('Changed files with delta notes. Format: "path/to/file: what changed" — NO code snippets, path+delta only.'),
-    implicitRules: z.array(z.string()).optional().describe('Tech stack, naming conventions, env vars, implicit project rules — anything not derivable from reading code')
+    implicitRules: z.array(z.string()).optional().describe('Tech stack, naming conventions, env vars, implicit project rules — anything not derivable from reading code. Write in English.')
   },
   async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules }) => {
     try {

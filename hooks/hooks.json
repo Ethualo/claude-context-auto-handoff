@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "CRITICAL: Context compaction imminent. Call 'generate_handoff_manifest' NOW before compaction. Fill all fields: summary (full session recap), taskDescription (goal), currentStatus (done vs remaining), keyDecisions (architecture choices + why), failedApproaches (already-failed — do NOT retry), nextSteps (next session tasks), blockers (unresolved errors). Do NOT allow compaction without calling this tool."
+            "prompt": "CRITICAL: Context compaction imminent. Call 'generate_handoff_manifest' NOW before compaction. Fill all fields: summary (full session recap), taskDescription (goal), currentStatus (done vs remaining), keyDecisions (architecture choices + why), failedApproaches (already-failed — do NOT retry), nextSteps (next session tasks), blockers (unresolved errors). Write ALL field values in English. Do NOT allow compaction without calling this tool."
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "If a work unit just completed (feature done, tests passed, commit made), call 'generate_handoff_manifest'. Fill taskDescription, keyDecisions, and failedApproaches so the next session has full context."
+            "prompt": "If a work unit just completed (feature done, tests passed, commit made), call 'generate_handoff_manifest'. Fill taskDescription, keyDecisions, and failedApproaches so the next session has full context. Write ALL field values in English."
           }
         ]
       }
