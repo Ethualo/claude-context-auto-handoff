@@ -6,7 +6,6 @@
 
 ![npm version](https://img.shields.io/npm/v/claude-context-auto-handoff)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A51.0.0-orange)
 
 ---
 
