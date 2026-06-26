@@ -1,0 +1,28 @@
+{
+  "name": "context-handoff",
+  "description": "Claude Code plugin for automatic session context handoff across compactions and stops.",
+  "owner": {
+    "name": "Ethualo",
+    "email": "lkh0926ym@naver.com"
+  },
+  "plugins": [
+    {
+      "name": "claude-context-handoff",
+      "displayName": "Context Auto-Handoff",
+      "description": "Automatically saves session context and generates handoff manifests before Claude compacts or stops.",
+      "source": {
+        "source": "npm",
+        "package": "claude-context-auto-handoff"
+      },
+      "homepage": "https://github.com/Ethualo/claude-context-auto-handoff",
+      "repository": "https://github.com/Ethualo/claude-context-auto-handoff",
+      "license": "MIT",
+      "author": {
+        "name": "Ethualo",
+        "email": "lkh0926ym@naver.com"
+      },
+      "keywords": ["context", "handoff", "session", "memory", "compaction", "claude-code"],
+      "category": "productivity"
+    }
+  ]
+}

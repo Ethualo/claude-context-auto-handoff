@@ -6,9 +6,11 @@
     "name": "Ethualo",
     "email": "lkh0926ym@naver.com"
   },
-  "homepage": "",
+  "homepage": "https://github.com/Ethualo/claude-context-auto-handoff",
   "repository": "https://github.com/Ethualo/claude-context-auto-handoff",
   "license": "MIT",
+  "keywords": ["context", "handoff", "session", "memory", "compaction", "claude-code"],
+  "category": "productivity",
   "mcpServers": {
     "context-handoff-manager": {
       "command": "node",
