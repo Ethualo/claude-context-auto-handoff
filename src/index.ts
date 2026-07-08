@@ -22,15 +22,17 @@ server.tool(
     failedApproaches: z.array(z.string()).optional().describe('Already-failed attempts. Format each: "Approach: X → Result: Y → Lesson: Z". Prevents repeating mistakes. Write in English.'),
     blockers: z.string().optional().describe('Unresolved errors or blockers. Write in English.'),
     modifiedFiles: z.array(z.string()).optional().describe('Changed files with delta notes. Format: "path/to/file: what changed" — NO code snippets, path+delta only.'),
-    implicitRules: z.array(z.string()).optional().describe('Tech stack, naming conventions, env vars, implicit project rules — anything not derivable from reading code. Write in English.')
+    implicitRules: z.array(z.string()).optional().describe('Tech stack, naming conventions, env vars, implicit project rules — anything not derivable from reading code. Write in English.'),
+    workingDirectory: z.string().optional().describe('Absolute path to the project root where handoff.md should be written. Required on Windows where process.cwd() may return System32.')
   },
-  async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules }) => {
+  async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, workingDirectory }) => {
     try {
-      const claudeDir = path.join(process.cwd(), '.claude');
+      const projectRoot = workingDirectory || process.env['CLAUDE_PROJECT_DIR'] || process.cwd();
+      const claudeDir = path.join(projectRoot, '.claude');
       const handoffsDir = path.join(claudeDir, 'handoffs');
 
-      if (!fs.existsSync(claudeDir)) fs.mkdirSync(claudeDir, { recursive: true });
-      if (!fs.existsSync(handoffsDir)) fs.mkdirSync(handoffsDir, { recursive: true });
+      fs.mkdirSync(claudeDir, { recursive: true });
+      fs.mkdirSync(handoffsDir, { recursive: true });
 
       const now = new Date();
       const displayTime = now.toLocaleString();
