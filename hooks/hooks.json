@@ -5,7 +5,8 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "CRITICAL: Context compaction imminent. Call 'generate_handoff_manifest' NOW before compaction. Fill all fields: summary (full session recap), taskDescription (goal), currentStatus (done vs remaining), keyDecisions (architecture choices + why), failedApproaches (already-failed — do NOT retry), nextSteps (next session tasks), blockers (unresolved errors). Write ALL field values in English. Do NOT allow compaction without calling this tool."
+            "prompt": "Evaluate whether context compaction should proceed.\n\nContext: $ARGUMENTS\n\nRules:\n- If 'generate_handoff_manifest' has already been called in this session, respond: {\"ok\": true}\n- If the session has minimal context (just started, no significant work done), respond: {\"ok\": true}\n- If there is meaningful session context worth preserving (decisions, progress, failures) and 'generate_handoff_manifest' was NOT called yet, respond: {\"ok\": false, \"reason\": \"Context compaction imminent. Call 'generate_handoff_manifest' to preserve session state. Fill all fields: summary (full session recap), taskDescription (goal), currentStatus (done vs remaining), keyDecisions (architecture choices + why), failedApproaches (already-failed — do NOT retry), nextSteps (next session tasks), blockers (unresolved errors). Write ALL field values in English.\"}\n\nIMPORTANT: Respond ONLY with a single JSON object. No markdown formatting, no explanation, no code blocks.",
+            "timeout": 15
           }
         ]
       }
@@ -15,7 +16,8 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "If a work unit just completed (feature done, tests passed, commit made), call 'generate_handoff_manifest'. Fill taskDescription, keyDecisions, and failedApproaches so the next session has full context. Write ALL field values in English."
+            "prompt": "Evaluate whether Claude should stop working.\n\nContext: $ARGUMENTS\n\nRules:\n- If 'generate_handoff_manifest' has already been called in this session, respond: {\"ok\": true}\n- If no meaningful work was done (e.g., simple Q&A, clarification, no code changes), respond: {\"ok\": true}\n- If meaningful work was completed (code changes, feature implementation, bug fix, tests) but 'generate_handoff_manifest' was NOT called yet, respond: {\"ok\": false, \"reason\": \"A work unit was completed. Call 'generate_handoff_manifest' with taskDescription, keyDecisions, failedApproaches, and nextSteps so the next session has full context. Write ALL field values in English.\"}\n\nIMPORTANT: Respond ONLY with a single JSON object. No markdown formatting, no explanation, no code blocks.",
+            "timeout": 15
           }
         ]
       }
@@ -25,7 +27,8 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "On session start: if .claude/handoff.md exists, read it and briefly brief the user (in their language) on Task Description, Current Status, Key Decisions, Failed Approaches, Blockers, Next Steps. If absent, stay silent."
+            "prompt": "On session start: if .claude/handoff.md exists, read it and briefly brief the user (in their language) on Task Description, Current Status, Key Decisions, Failed Approaches, Blockers, Next Steps. If absent, stay silent.",
+            "timeout": 10
           }
         ]
       }
