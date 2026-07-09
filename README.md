@@ -28,12 +28,12 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 
 ### Tools
 
-- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/handoff-{timestamp}.md`.
+- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/{YYYY-MM-DD}/handoff-{timestamp}.md` (auto-pruned to the most recent 50 archive files).
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `summary` | `string` | ✅ | Terse session recap (telegraphese) |
 | `nextSteps` | `string[]` | ✅ | Ordered todo list for the next session |
+| `summary` | `string` | ✗ | Terse session recap (telegraphese) — omit if other fields cover it |
 | `taskDescription` | `string` | ✗ | High-level goal + core intent (why this matters) |
 | `currentStatus` | `string` | ✗ | What is done vs what remains — state why, not just what |
 | `keyDecisions` | `string[]` | ✗ | Architecture choices and reasons. Format: `"Decision: X — Reason: Y"` |
@@ -41,6 +41,7 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 | `modifiedFiles` | `string[]` | ✗ | Changed files with delta notes. Format: `"path/to/file: what changed"` — no code |
 | `implicitRules` | `string[]` | ✗ | Tech stack, naming conventions, env vars — anything not derivable from reading code |
 | `blockers` | `string` | ✗ | Unresolved errors or open questions |
+| `workingDirectory` | `string` | ✗ | Absolute path to the project root to write handoff.md to — needed on Windows where `process.cwd()` may resolve to System32 |
 
 ### Skills
 
@@ -186,7 +187,7 @@ Same three hooks fire automatically via `.codex/hooks.json`. No slash commands �
 * Env: NEXT_PUBLIC_SUPABASE_ANON_KEY active
 
 ---
-*Run `/handoff-resume` in the next session to restore this context.*
+*Context is auto-restored on session start. Manual restore: `/handoff-resume`*
 ```
 
 ---
