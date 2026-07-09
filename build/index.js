@@ -29,11 +29,14 @@ server.tool('generate_handoff_manifest', {
         const now = new Date();
         const displayTime = now.toLocaleString();
         const timestamp = now.toISOString().replace(/[:.]/g, '-');
-        const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime });
+        const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime, project: path.basename(projectRoot), isoDate: now.toISOString() });
         const mainPath = path.join(claudeDir, 'handoff.md');
         fs.writeFileSync(mainPath, content, 'utf-8');
-        const archivePath = path.join(handoffsDir, `handoff-${timestamp}.md`);
+        const dateDir = path.join(handoffsDir, now.toISOString().slice(0, 10));
+        fs.mkdirSync(dateDir, { recursive: true });
+        const archivePath = path.join(dateDir, `handoff-${timestamp}.md`);
         fs.writeFileSync(archivePath, content, 'utf-8');
+        pruneHandoffs(handoffsDir, 50);
         return {
             content: [{
                     type: 'text',
@@ -48,9 +51,36 @@ server.tool('generate_handoff_manifest', {
         };
     }
 });
+function pruneHandoffs(handoffsDir, keep) {
+    const dateDirs = fs.readdirSync(handoffsDir, { withFileTypes: true }).filter(d => d.isDirectory());
+    const files = dateDirs.flatMap(d => {
+        const dirPath = path.join(handoffsDir, d.name);
+        return fs.readdirSync(dirPath).map(name => ({ path: path.join(dirPath, name), name }));
+    });
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    const excess = files.length - keep;
+    if (excess > 0) {
+        files.slice(0, excess).forEach(f => fs.unlinkSync(f.path));
+    }
+    for (const d of dateDirs) {
+        const dirPath = path.join(handoffsDir, d.name);
+        if (fs.readdirSync(dirPath).length === 0)
+            fs.rmdirSync(dirPath);
+    }
+}
 function buildMarkdown(params) {
-    const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime } = params;
+    const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime, project, isoDate } = params;
+    const frontmatter = [
+        `---`,
+        `date: ${isoDate}`,
+        `project: ${project}`,
+        `next_steps_count: ${nextSteps.length}`,
+        `has_blockers: ${Boolean(blockers)}`,
+        `---`,
+        ``
+    ].join('\n');
     const sections = [
+        frontmatter,
         `# Session Handoff Snapshot`,
         `> **Generated:** ${displayTime}`,
         ``
