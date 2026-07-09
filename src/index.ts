@@ -155,7 +155,7 @@ function buildMarkdown(params: {
     sections.push(`## Summary\n${summary}\n`);
   }
 
-  sections.push(`---\n*Context is auto-restored on session start. Manual restore: \`/resume\`*`);
+  sections.push(`---\n*Context is auto-restored on session start. Manual restore: \`/handoff-resume\`*`);
 
   return sections.join('\n');
 }

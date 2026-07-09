@@ -46,8 +46,8 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 
 | Command | Behavior |
 |---------|----------|
-| `/handoff` | Gather session context and call `generate_handoff_manifest` |
-| `/resume` | Read `.claude/handoff.md` and restore context in a new session |
+| `/handoff-save` | Gather session context and call `generate_handoff_manifest` |
+| `/handoff-resume` | Read `.claude/handoff.md` and restore context in a new session |
 
 ### Hooks
 
@@ -139,12 +139,12 @@ All three hooks fire automatically â€” `SessionStart` restores context on sessio
 
 **Manual checkpoint:**
 ```
-/handoff
+/handoff-save
 ```
 
 **Manual resume (if auto-restore didn't trigger):**
 ```
-/resume
+/handoff-resume
 ```
 
 ### Codex
@@ -186,7 +186,7 @@ Same three hooks fire automatically via `.codex/hooks.json`. No slash commands â
 * Env: NEXT_PUBLIC_SUPABASE_ANON_KEY active
 
 ---
-*Run `/resume` in the next session to restore this context.*
+*Run `/handoff-resume` in the next session to restore this context.*
 ```
 
 ---

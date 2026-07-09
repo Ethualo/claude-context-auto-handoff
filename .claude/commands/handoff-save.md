@@ -1,4 +1,4 @@
-# /handoff — Save session handoff
+# /handoff-save — Save session handoff
 
 Saves context to `.claude/handoff.md` and timestamped archive to `.claude/handoffs/`.
 
@@ -20,4 +20,4 @@ Saves context to `.claude/handoff.md` and timestamped archive to `.claude/handof
 3. Confirm to user:
    - Latest: `.claude/handoff.md`
    - Archive: `.claude/handoffs/handoff-{timestamp}.md`
-   - Next session: run `/resume` or SessionStart hook auto-restores
+   - Next session: run `/handoff-resume` or SessionStart hook auto-restores

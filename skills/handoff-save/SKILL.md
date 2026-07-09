@@ -1,5 +1,5 @@
 ---
-description: Save current session context to handoff file. Use when user runs /handoff or asks to save session state before ending.
+description: Save current session context to handoff file. Use when user runs /handoff-save or asks to save session state before ending.
 ---
 
 Save session context to `.claude/handoff.md` and timestamped archive to `.claude/handoffs/`.
@@ -34,4 +34,4 @@ Write all field values using telegraphese — drop articles, pronouns, polite wo
 3. Confirm to user:
    - Latest: `.claude/handoff.md`
    - Archive: `.claude/handoffs/handoff-{timestamp}.md`
-   - Next session: run `/resume` or SessionStart hook auto-restores
+   - Next session: run `/handoff-resume` or SessionStart hook auto-restores
