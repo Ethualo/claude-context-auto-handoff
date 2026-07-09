@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "On session start: if .claude/handoff.md exists, read it and briefly brief the user (in their language) on Task Description, Current Status, Key Decisions, Failed Approaches, Blockers, Next Steps. If absent, stay silent.",
+            "prompt": "On session start: check if .claude/handoff.md exists.\n\nRules:\n- If it is missing, or exists but is empty/unparseable (e.g. no frontmatter, no recognizable sections), stay silent.\n- Otherwise, read it and briefly brief the user (in their language) on Task Description, Current Status, Key Decisions, Failed Approaches, Blockers, Next Steps.\n- Check the frontmatter `date` field. If it is more than 3 days before today, prepend a short staleness note to the brief (e.g. 'this handoff is N days old, may be outdated') so the user knows to double-check before trusting it.",
             "timeout": 10
           }
         ]
