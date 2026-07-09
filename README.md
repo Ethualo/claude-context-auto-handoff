@@ -93,7 +93,7 @@ claude plugin install claude-context-auto-handoff
 
 ```bash
 npm install -g claude-context-auto-handoff
-npm run setup  # hooks.json 자동 배치
+claude-context-handoff-setup  # hooks.json 자동 배치
 ```
 
 ### Manual MCP configuration (Claude Code)
