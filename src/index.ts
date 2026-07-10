@@ -23,9 +23,10 @@ server.tool(
     blockers: z.string().optional().describe('Unresolved errors or blockers. Write in English.'),
     modifiedFiles: z.array(z.string()).optional().describe('Changed files with delta notes. Format: "path/to/file: what changed" — NO code snippets, path+delta only.'),
     implicitRules: z.array(z.string()).optional().describe('Tech stack, naming conventions, env vars, implicit project rules — anything not derivable from reading code. Write in English.'),
+    keywords: z.array(z.string()).max(8).optional().describe('Short topic/feature tags (e.g. file names, feature names) used to match a future session prompt for auto-resume. Write in English, lowercase, 1-3 words each.'),
     workingDirectory: z.string().optional().describe('Absolute path to the project root where handoff.md should be written. Required on Windows where process.cwd() may return System32.')
   },
-  async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, workingDirectory }) => {
+  async ({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, workingDirectory }) => {
     try {
       const projectRoot = workingDirectory || process.env['CLAUDE_PROJECT_DIR'] || process.cwd();
       const claudeDir = path.join(projectRoot, '.claude');
@@ -38,7 +39,7 @@ server.tool(
       const displayTime = now.toLocaleString();
       const timestamp = now.toISOString().replace(/[:.]/g, '-');
 
-      const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime, project: path.basename(projectRoot), isoDate: now.toISOString() });
+      const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, displayTime, project: path.basename(projectRoot), isoDate: now.toISOString() });
 
       const mainPath = path.join(claudeDir, 'handoff.md');
       fs.writeFileSync(mainPath, content, 'utf-8');
@@ -95,11 +96,12 @@ function buildMarkdown(params: {
   blockers?: string;
   modifiedFiles?: string[];
   implicitRules?: string[];
+  keywords?: string[];
   displayTime: string;
   project: string;
   isoDate: string;
 }): string {
-  const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, displayTime, project, isoDate } = params;
+  const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, displayTime, project, isoDate } = params;
 
   const frontmatter = [
     `---`,
@@ -107,6 +109,7 @@ function buildMarkdown(params: {
     `project: ${project}`,
     `next_steps_count: ${nextSteps.length}`,
     `has_blockers: ${Boolean(blockers)}`,
+    `keywords: ${(keywords ?? []).join(', ')}`,
     `---`,
     ``
   ].join('\n');
@@ -155,7 +158,7 @@ function buildMarkdown(params: {
     sections.push(`## Summary\n${summary}\n`);
   }
 
-  sections.push(`---\n*Context is auto-restored on session start. Manual restore: \`/handoff-resume\`*`);
+  sections.push(`---\n*A short hint surfaces on session start; full context loads only if your next prompt matches a keyword above, or via manual \`/handoff-resume\`.*`);
 
   return sections.join('\n');
 }
