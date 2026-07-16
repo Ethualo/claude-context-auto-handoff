@@ -28,7 +28,7 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 
 ### Tools
 
-- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/{YYYY-MM-DD}/handoff-{timestamp}.md` (auto-pruned to the most recent 50 archive files) and appends a one-line entry to `.claude/handoffs/index.md` — a compact, grep-friendly index (date, keywords, headline, path) for searching past handoffs without opening every archive file.
+- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/{YYYY-MM-DD}/handoff-{timestamp}.md` (auto-pruned to the most recent 50 archive files) and upserts a one-line entry in `.claude/handoffs/index.md` — a compact, grep-friendly index (date, keywords, headline, path) for searching past handoffs without opening every archive file. Repeat saves within the same session (e.g. both `PreCompact` and `Stop` firing in one long session) update that session's own archive file and index line in place instead of piling up near-duplicates — each MCP server process gets one session id, tagged in the `session:` frontmatter field.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|

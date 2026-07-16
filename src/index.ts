@@ -4,11 +4,18 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import * as fs from 'fs';
 import * as path from 'path';
+import { randomUUID } from 'node:crypto';
 
 const server = new McpServer({
   name: 'context-handoff-manager',
   version: '1.0.0'
 });
+
+// One MCP server process = one Claude Code session (stdio transport is 1:1 per session).
+// Reusing this id lets repeated saves within the same session update the same archive
+// file instead of piling up near-duplicate entries every time PreCompact/Stop fires.
+const sessionId = randomUUID().slice(0, 8);
+let lastArchivePath: string | null = null;
 
 
 server.tool(
@@ -39,17 +46,24 @@ server.tool(
       const displayTime = now.toLocaleString();
       const timestamp = now.toISOString().replace(/[:.]/g, '-');
 
-      const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, displayTime, project: path.basename(projectRoot), isoDate: now.toISOString() });
+      const content = buildMarkdown({ summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, displayTime, project: path.basename(projectRoot), isoDate: now.toISOString(), sessionId });
 
       const mainPath = path.join(claudeDir, 'handoff.md');
       fs.writeFileSync(mainPath, content, 'utf-8');
 
-      const dateDir = path.join(handoffsDir, now.toISOString().slice(0, 10));
-      fs.mkdirSync(dateDir, { recursive: true });
-      const archivePath = path.join(dateDir, `handoff-${timestamp}.md`);
+      // Reuse this session's own archive file across repeat saves (PreCompact/Stop can
+      // both fire in one long session) instead of piling up near-duplicate archives.
+      const archivePath = lastArchivePath && fs.existsSync(lastArchivePath)
+        ? lastArchivePath
+        : (() => {
+            const dateDir = path.join(handoffsDir, now.toISOString().slice(0, 10));
+            fs.mkdirSync(dateDir, { recursive: true });
+            return path.join(dateDir, `handoff-${timestamp}.md`);
+          })();
       fs.writeFileSync(archivePath, content, 'utf-8');
+      lastArchivePath = archivePath;
 
-      appendIndexEntry(handoffsDir, {
+      upsertIndexEntry(handoffsDir, {
         isoDate: now.toISOString(),
         keywords: keywords ?? [],
         headline: taskDescription || summary || nextSteps[0] || '(no summary)',
@@ -73,7 +87,7 @@ server.tool(
   }
 );
 
-function appendIndexEntry(handoffsDir: string, entry: {
+function upsertIndexEntry(handoffsDir: string, entry: {
   isoDate: string;
   keywords: string[];
   headline: string;
@@ -82,15 +96,22 @@ function appendIndexEntry(handoffsDir: string, entry: {
   const indexPath = path.join(handoffsDir, 'index.md');
   const headline = entry.headline.replace(/\|/g, '-').replace(/\s+/g, ' ').trim().slice(0, 120);
   const keywords = entry.keywords.join(', ') || '(none)';
-  const line = `${entry.isoDate} | ${keywords} | ${headline} | ${entry.relativePath}\n`;
+  const line = `${entry.isoDate} | ${keywords} | ${headline} | ${entry.relativePath}`;
 
-  fs.appendFileSync(indexPath, line, 'utf-8');
+  let lines = fs.existsSync(indexPath)
+    ? fs.readFileSync(indexPath, 'utf-8').split('\n').filter(Boolean)
+    : [];
 
-  const lines = fs.readFileSync(indexPath, 'utf-8').split('\n').filter(Boolean);
-  const excess = lines.length - 50;
-  if (excess > 0) {
-    fs.writeFileSync(indexPath, lines.slice(excess).join('\n') + '\n', 'utf-8');
+  const existingIdx = lines.findIndex((l) => l.endsWith(`| ${entry.relativePath}`));
+  if (existingIdx !== -1) {
+    lines[existingIdx] = line;
+  } else {
+    lines.push(line);
+    const excess = lines.length - 50;
+    if (excess > 0) lines = lines.slice(excess);
   }
+
+  fs.writeFileSync(indexPath, lines.join('\n') + '\n', 'utf-8');
 }
 
 function pruneHandoffs(handoffsDir: string, keep: number): void {
@@ -127,13 +148,15 @@ function buildMarkdown(params: {
   displayTime: string;
   project: string;
   isoDate: string;
+  sessionId: string;
 }): string {
-  const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, displayTime, project, isoDate } = params;
+  const { summary, nextSteps, taskDescription, currentStatus, keyDecisions, failedApproaches, blockers, modifiedFiles, implicitRules, keywords, displayTime, project, isoDate, sessionId } = params;
 
   const frontmatter = [
     `---`,
     `date: ${isoDate}`,
     `project: ${project}`,
+    `session: ${sessionId}`,
     `next_steps_count: ${nextSteps.length}`,
     `has_blockers: ${Boolean(blockers)}`,
     `keywords: ${(keywords ?? []).join(', ')}`,
