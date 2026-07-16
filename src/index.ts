@@ -49,6 +49,13 @@ server.tool(
       const archivePath = path.join(dateDir, `handoff-${timestamp}.md`);
       fs.writeFileSync(archivePath, content, 'utf-8');
 
+      appendIndexEntry(handoffsDir, {
+        isoDate: now.toISOString(),
+        keywords: keywords ?? [],
+        headline: taskDescription || summary || nextSteps[0] || '(no summary)',
+        relativePath: path.relative(handoffsDir, archivePath).replace(/\\/g, '/')
+      });
+
       pruneHandoffs(handoffsDir, 50);
 
       return {
@@ -65,6 +72,26 @@ server.tool(
     }
   }
 );
+
+function appendIndexEntry(handoffsDir: string, entry: {
+  isoDate: string;
+  keywords: string[];
+  headline: string;
+  relativePath: string;
+}): void {
+  const indexPath = path.join(handoffsDir, 'index.md');
+  const headline = entry.headline.replace(/\|/g, '-').replace(/\s+/g, ' ').trim().slice(0, 120);
+  const keywords = entry.keywords.join(', ') || '(none)';
+  const line = `${entry.isoDate} | ${keywords} | ${headline} | ${entry.relativePath}\n`;
+
+  fs.appendFileSync(indexPath, line, 'utf-8');
+
+  const lines = fs.readFileSync(indexPath, 'utf-8').split('\n').filter(Boolean);
+  const excess = lines.length - 50;
+  if (excess > 0) {
+    fs.writeFileSync(indexPath, lines.slice(excess).join('\n') + '\n', 'utf-8');
+  }
+}
 
 function pruneHandoffs(handoffsDir: string, keep: number): void {
   const dateDirs = fs.readdirSync(handoffsDir, { withFileTypes: true }).filter(d => d.isDirectory());

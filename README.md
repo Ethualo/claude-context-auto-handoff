@@ -28,7 +28,7 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 
 ### Tools
 
-- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/{YYYY-MM-DD}/handoff-{timestamp}.md` (auto-pruned to the most recent 50 archive files).
+- **`generate_handoff_manifest`** — Writes a structured `.claude/handoff.md` to the current project directory. Also archives to `.claude/handoffs/{YYYY-MM-DD}/handoff-{timestamp}.md` (auto-pruned to the most recent 50 archive files) and appends a one-line entry to `.claude/handoffs/index.md` — a compact, grep-friendly index (date, keywords, headline, path) for searching past handoffs without opening every archive file.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -49,6 +49,7 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 |---------|----------|
 | `/handoff-save` | Gather session context and call `generate_handoff_manifest` |
 | `/handoff-resume` | Read `.claude/handoff.md` and restore context in a new session |
+| `/handoff-search` | Grep `.claude/handoffs/index.md` for a topic and surface matching past sessions — no database, no embeddings |
 
 ### Hooks
 
