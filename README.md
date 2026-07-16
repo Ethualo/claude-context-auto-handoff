@@ -22,6 +22,8 @@ Claude's context window eventually fills and compacts — losing design decision
 
 Handoff content is written in **telegraphese** (no articles, no filler, no code snippets) and structured to maximize token efficiency while preserving all decision context the next session needs.
 
+Drafting (typically 3-6k tokens per save) is delegated to a Haiku subagent, which also calls `generate_handoff_manifest` itself — the draft never round-trips through the main-session model.
+
 ---
 
 ## Components
@@ -47,7 +49,7 @@ Handoff content is written in **telegraphese** (no articles, no filler, no code 
 
 | Command | Behavior |
 |---------|----------|
-| `/handoff-save` | Gather session context and call `generate_handoff_manifest` |
+| `/handoff-save` | Delegate to a Haiku subagent that drafts session context and calls `generate_handoff_manifest` itself — keeps the 3-6k token draft off the (usually pricier) main-session model |
 | `/handoff-resume` | Read `.claude/handoff.md` and restore context in a new session |
 | `/handoff-search` | Grep `.claude/handoffs/index.md` for a topic and surface matching past sessions — no database, no embeddings |
 
@@ -57,7 +59,7 @@ Claude Code hooks are built-in. Codex hooks require copying `templates/.codex` t
 
 | Event | Behavior |
 |-------|----------|
-| `PreCompact` | Prompts the model to call `generate_handoff_manifest` before context compression |
+| `PreCompact` | Prompts the model to invoke the `handoff-save` skill (Haiku subagent) before context compression |
 | `Stop` | Warns if handoff is stale or missing after each response |
 | `SessionStart` | Surfaces a short hint (age, topics) if a handoff exists — full content loads via keyword match or `/handoff-resume` |
 | `UserPromptSubmit` | If your prompt matches a keyword from the last handoff, injects the full handoff content as context automatically |
@@ -162,7 +164,7 @@ Same three hooks fire automatically via `.codex/hooks.json`. No slash commands �
 | Event | Behavior |
 |-------|----------|
 | `SessionStart` | Reads `.claude/handoff.md` and injects content as context |
-| `PreCompact` | Prompts Codex to call `generate_handoff_manifest` before compression |
+| `PreCompact` | Prompts Codex to invoke the handoff-save skill (Haiku subagent) before compression |
 | `Stop` | Warns if handoff is stale (>5 min) or missing |
 
 ### Output format
