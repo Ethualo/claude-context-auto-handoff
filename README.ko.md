@@ -1,4 +1,4 @@
-# claude-context-auto-handoff
+# context-auto-handoff
 
 **[English](README.md)** | 한국어
 
