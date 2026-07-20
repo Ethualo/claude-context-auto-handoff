@@ -16,9 +16,9 @@ Write all field values using telegraphese — drop articles, pronouns, polite wo
 
 ## Steps
 
-1. Delegate the entire save to a cheap model — Haiku — via the `Agent` tool with `model: "haiku"`, `subagent_type: "general-purpose"`, `run_in_background: false`. Do NOT ask it to return the drafted content to the main session; the draft can be 3k-6k tokens and round-tripping it through the (usually pricier) main-session model wastes those tokens twice. Instead, instruct the agent to do everything itself:
+1. Determine the project root as an absolute path (the directory containing `.claude`) BEFORE spawning the agent. Delegate the entire save to a cheap model — Haiku — via the `Agent` tool with `model: "haiku"`, `subagent_type: "general-purpose"`, `run_in_background: false`. Do NOT ask it to return the drafted content to the main session; the draft can be 3k-6k tokens and round-tripping it through the (usually pricier) main-session model wastes those tokens twice. Instead, instruct the agent to do everything itself:
    - Read the conversation context it's given and draft the fields below per the Content Generation Rules above.
-   - Call `generate_handoff_manifest` itself with the drafted fields:
+   - Call `generate_handoff_manifest` itself with the drafted fields, ALWAYS including `workingDirectory` set to the absolute project root path determined above. The subagent runs with a different cwd (its own scratchpad), so omitting `workingDirectory` writes the handoff to the wrong location — pass it explicitly every time, never rely on the tool's default.
      - `summary`, `nextSteps` — required
      - `taskDescription`, `currentStatus`, `keyDecisions`, `failedApproaches`, `modifiedFiles`, `implicitRules` — recommended
      - `blockers` — optional
