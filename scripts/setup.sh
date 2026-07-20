@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# context-handoff-mcp-server -- one-line setup for Linux/macOS
-# Usage: curl -fsSL https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.sh | bash
+# claude-context-auto-handoff -- one-line setup for Linux/macOS
+# Usage: curl -fsSL https://raw.githubusercontent.com/Ethualo/claude-context-auto-handoff/main/scripts/setup.sh | bash
 # Codex support:  ... | bash -s -- --codex
 
 set -e

@@ -70,14 +70,14 @@ Claude Code hooks are built-in. Codex hooks require copying `templates/.codex` t
 
 **Linux / macOS**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Ethualo/claude-context-auto-handoff/main/scripts/setup.sh | bash
 # Also set up Codex (hooks + handoff-drafter subagent + AGENTS.md):
-curl -fsSL https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.sh | bash -s -- --codex
+curl -fsSL https://raw.githubusercontent.com/Ethualo/claude-context-auto-handoff/main/scripts/setup.sh | bash -s -- --codex
 ```
 
 **Windows (PowerShell)**
 ```powershell
-irm https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.ps1 -OutFile setup.ps1
+irm https://raw.githubusercontent.com/Ethualo/claude-context-auto-handoff/main/scripts/setup.ps1 -OutFile setup.ps1
 .\setup.ps1          # Claude Code only
 .\setup.ps1 -Codex   # also set up Codex (hooks + handoff-drafter subagent + AGENTS.md)
 ```

@@ -1,5 +1,5 @@
-# context-handoff-mcp-server -- one-line setup for Windows (PowerShell)
-# Usage: irm https://raw.githubusercontent.com/Ethualo/context-handoff-mcp-server/main/scripts/setup.ps1 | iex
+# claude-context-auto-handoff -- one-line setup for Windows (PowerShell)
+# Usage: irm https://raw.githubusercontent.com/Ethualo/claude-context-auto-handoff/main/scripts/setup.ps1 | iex
 # Codex support: run the downloaded file with -Codex, e.g. .\setup.ps1 -Codex
 
 param(
